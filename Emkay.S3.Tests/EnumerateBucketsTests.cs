@@ -1,31 +1,26 @@
 ﻿using NUnit.Framework;
+using Moq;
+#pragma warning disable 618
 
 namespace Emkay.S3.Tests
 {
     [TestFixture]
     public class EnumerateBucketsTests : S3TestsBase
     {
-        private EnumerateBuckets _enumerate;
-
-        [SetUp]
-        public void SetUp()
-        {
-            _enumerate = new EnumerateBuckets(ClientFactory, RequestTimoutMilliseconds, LoggerMock);
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            if (_enumerate != null)
-                _enumerate.Dispose();
-            _enumerate = null;
-        }
-
         [Test]
-        public void Execute_should_succeed()
+        public void should_find_all_buckets()
         {
-            Assert.IsTrue(_enumerate.Execute());
-            Assert.IsNotNull(_enumerate.Buckets);
+            Mock.Get(MockS3Client).Setup(x => x.EnumerateBuckets()).Returns(new[] {"bucket1", "bucket2", "bucket3"});
+
+            var enumerateTask = new EnumerateBuckets(MockS3ClientFactory, MockLogger)
+            {
+                Key = FakeAwsKey,
+                Secret = FakeAwsSecret,
+            };
+
+            Assert.That(enumerateTask.Execute(), Is.True);
+
+            Assert.That(enumerateTask.Buckets, Is.EquivalentTo(new[] { "bucket1", "bucket2", "bucket3" }));
         }
     }
 }

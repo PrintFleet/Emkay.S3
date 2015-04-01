@@ -1,37 +1,67 @@
 ﻿using NUnit.Framework;
+using Moq;
+#pragma warning disable 618
 
 namespace Emkay.S3.Tests
 {
     [TestFixture]
     public class EnumerateChildrenTests : S3TestsBase
     {
-        private EnumerateChildren _enumerate;
-        protected const string Bucket = ""; // TODO edit your bucket name here
-        protected const string Prefix = ""; // TODO edit your prefix here
-
-        [SetUp]
-        public void SetUp()
+        [Test]
+        public void should_find_all_children()
         {
-            _enumerate = new EnumerateChildren(ClientFactory, RequestTimoutMilliseconds, LoggerMock)
-                            {
-                                Bucket = Bucket,
-                                Prefix = Prefix
-                            };
-        }
+            Mock.Get(MockS3Client).Setup(x => x.EnumerateChildren("my_bucket",null))
+                .Returns(new[] { "test1.txt", "dir2/test2.txt", "dir2/test3.txt" });
 
-        [TearDown]
-        public void TearDown()
-        {
-            if (_enumerate != null)
-                _enumerate.Dispose();
-            _enumerate = null;
+            var enumerateTask = new EnumerateChildren(MockS3ClientFactory, MockLogger)
+            {
+                Key = FakeAwsKey,
+                Secret = FakeAwsSecret,
+                Bucket = "my_bucket",
+            };
+
+            Assert.That(enumerateTask.Execute(), Is.True);
+
+            Assert.That(enumerateTask.Children, Is.EquivalentTo(new[] { "test1.txt", "dir2/test2.txt", "dir2/test3.txt" }));
         }
 
         [Test]
-        public void Execute_should_succeed()
+        public void should_find_all_children_with_empty_prefix()
         {
-            Assert.IsTrue(_enumerate.Execute());
-            Assert.IsNotNull(_enumerate.Children);
+            Mock.Get(MockS3Client).Setup(x => x.EnumerateChildren("my_bucket", ""))
+                .Returns(new[] { "test1.txt", "dir2/test2.txt", "dir2/test3.txt" });
+
+            var enumerateTask = new EnumerateChildren(MockS3ClientFactory, MockLogger)
+            {
+                Key = FakeAwsKey,
+                Secret = FakeAwsSecret,
+                Bucket = "my_bucket",
+                Prefix = string.Empty
+            };
+
+            Assert.That(enumerateTask.Execute(), Is.True);
+
+            Assert.That(enumerateTask.Children, Is.EquivalentTo(new[] { "test1.txt", "dir2/test2.txt", "dir2/test3.txt" }));
         }
+
+        [Test]
+        public void should_find_children_in_subdir()
+        {
+            Mock.Get(MockS3Client).Setup(x => x.EnumerateChildren("my_bucket", "dir2/"))
+                .Returns(new[] { "dir2/test2.txt", "dir2/test3.txt" });
+
+            var enumerateTask = new EnumerateChildren(MockS3ClientFactory, MockLogger)
+            {
+                Key = FakeAwsKey,
+                Secret = FakeAwsSecret,
+                Bucket = "my_bucket",
+                Prefix = "dir2/"
+            };
+
+            Assert.That(enumerateTask.Execute(), Is.True);
+
+            Assert.That(enumerateTask.Children, Is.EquivalentTo(new[] { "dir2/test2.txt", "dir2/test3.txt" }));
+        }
+
     }
 }

@@ -1,54 +1,34 @@
 ﻿using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Moq;
 using NUnit.Framework;
+#pragma warning disable 618
 
 namespace Emkay.S3.Tests
 {
     [TestFixture]
-    public class DeleteChildrenTests : PublishTestsBase
+    public class DeleteChildrenTests : S3TestsBase
     {
-        private DeleteChildren _delete;
-        private const string TestFilePath = ""; // TODO insert path to a local file here!
-        private const string TestFileName = ""; // TODO insert the name of the local file here!
-
-        [SetUp]
-        public void SetUp()
-        {
-            var publish = new PublishFiles(ClientFactory, RequestTimoutMilliseconds, true, LoggerMock)
-                            {
-                                SourceFiles = new ITaskItem[] { new TaskItem(TestFilePath) },
-                                Bucket = Bucket,
-                                DestinationFolder = DestinationFolder
-                            };
-
-            Assert.IsTrue(publish.Execute());
-
-            _delete = new DeleteChildren(ClientFactory, RequestTimoutMilliseconds, LoggerMock)
-                        {
-                            Bucket = Bucket,
-                            Children = new[] { string.Format("{0}/{1}", DestinationFolder, TestFileName) }
-                        };
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            var removeBucket = new DeleteBucket(ClientFactory, RequestTimoutMilliseconds, LoggerMock)
-                {
-                    Bucket = Bucket
-                };
-
-            Assert.IsTrue(removeBucket.Execute(), "Could not remove test bucket!");
-
-            if (_delete != null)
-                _delete.Dispose();
-            _delete = null;
-        }
-
         [Test]
-        public void Execute_should_succeed()
+        public void should_call_DeleteBucket()
         {
-            Assert.IsTrue(_delete.Execute());
+            var deleteTask = new DeleteChildren(MockS3ClientFactory, MockLogger)
+            {
+                Key = FakeAwsKey,
+                Secret = FakeAwsSecret,
+                Bucket = "my_bucket",
+                Children = new[]
+                {
+                    "child1",
+                    "child2/in/subdir/",
+                },
+            };
+
+            Assert.That(deleteTask.Execute(), Is.True);
+
+            // make sure S3 methods were invoked correctly
+            Mock.Get(MockS3Client).Verify(x => x.DeleteObject("my_bucket", "child1"));
+            Mock.Get(MockS3Client).Verify(x => x.DeleteObject("my_bucket", "child2/in/subdir/"));
         }
     }
 }

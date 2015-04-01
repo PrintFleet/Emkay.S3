@@ -1,36 +1,26 @@
-﻿using NUnit.Framework;
+﻿using Moq;
+using NUnit.Framework;
+#pragma warning disable 618
 
 namespace Emkay.S3.Tests
 {
     [TestFixture]
     public class DeleteBucketTests : S3TestsBase
     {
-        private DeleteBucket _delete;
-        private const string BucketName = "S3-66427BC0DE13";
-
-        [SetUp]
-        public void SetUp()
-        {
-            Client.EnsureBucketExists(BucketName);
-
-            _delete = new DeleteBucket(ClientFactory, RequestTimoutMilliseconds, LoggerMock)
-                        {
-                            Bucket = BucketName
-                        };
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            if (_delete != null)
-                _delete.Dispose();
-            _delete = null;
-        }
-
         [Test]
-        public void Execute_should_succeed()
+        public void should_call_DeleteBucket()
         {
-            Assert.IsTrue(_delete.Execute());
+            var deleteTask = new DeleteBucket(MockS3ClientFactory, MockLogger)
+            {
+                Key = FakeAwsKey,
+                Secret = FakeAwsSecret,
+                Bucket = "bucket_to_delete"
+            };
+
+            Assert.That(deleteTask.Execute(), Is.True);
+
+            // make sure S3 methods were invoked correctly
+            Mock.Get(MockS3Client).Verify(x => x.DeleteBucket("bucket_to_delete"));
         }
     }
 }
