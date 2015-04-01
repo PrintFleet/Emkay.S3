@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
@@ -12,14 +13,14 @@ namespace Emkay.S3.Tests
     /// </summary>
     internal class FakeFileItem : ITaskItem 
     {
-        public FakeFileItem(string filename, Dictionary<string, string> metadata = null)
+        public FakeFileItem(string filename, NameValueCollection metadata = null)
         {
             ItemSpec = filename;
-            FakeMetadata = metadata ?? new Dictionary<string, string>();
+            FakeMetadata = metadata ?? new NameValueCollection();
             FakeMetadata["Identity"] = filename;
         }
 
-        public Dictionary<string, string> FakeMetadata { get; set; }
+        public NameValueCollection FakeMetadata { get; set; }
 
         public string GetMetadata(string metadataName)
         {
@@ -43,7 +44,7 @@ namespace Emkay.S3.Tests
 
         public IDictionary CloneCustomMetadata()
         {
-            return new Dictionary<string, string>(FakeMetadata);
+            return FakeMetadata.Cast<string>().ToDictionary(key => key, key => FakeMetadata[key]);
         }
 
         public string ItemSpec { get; set; }
@@ -55,7 +56,7 @@ namespace Emkay.S3.Tests
 
         public int MetadataCount
         {
-            get { return FakeMetadata.Count(); }
+            get { return FakeMetadata.Count; }
         }
     }
 }
