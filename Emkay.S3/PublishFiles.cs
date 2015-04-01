@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 
 namespace Emkay.S3
 {
-    public class PublishFiles : PublishBase
+    public class PublishFiles : S3Base
     {
         public PublishFiles() :
             this(new S3ClientFactory())
@@ -18,7 +18,9 @@ namespace Emkay.S3
             bool publicRead = true,
             ITaskLogger logger = null)
             : base(s3ClientFactory, timeoutMilliseconds, publicRead, logger)
-        { }
+        {
+            PublicRead = publicRead;
+        }
 
         [Required]
         public ITaskItem[] SourceFiles { get; set; }
@@ -26,6 +28,8 @@ namespace Emkay.S3
         [Required]
         public string DestinationFolder { get; set; }
 
+        public bool PublicRead { get; set; }
+        
         public override bool Execute()
         {
             Logger.LogMessage(MessageImportance.Normal,
@@ -42,7 +46,15 @@ namespace Emkay.S3
             {
                 Client.EnsureBucketExists(Bucket);
 
-                Publish(Client, SourceFiles, Bucket, DestinationFolder, PublicRead, TimeoutMilliseconds);
+                foreach (var fileItem in SourceFiles.Where(taskItem => taskItem != null
+                && !string.IsNullOrEmpty(taskItem.GetMetadata("Identity"))))
+                {
+                    var info = new FileInfo(fileItem.GetMetadata("Identity"));
+                    var headers = MsBuildHelpers.GetCustomItemMetadata(fileItem);
+
+                    Logger.LogMessage(MessageImportance.Normal, string.Format("Copying file {0}", info.FullName));
+                    Client.PutFile(Bucket, CreateRelativePath(DestinationFolder, info.Name), info.FullName, headers, PublicRead, TimeoutMilliseconds);
+                }
                 return true;
             }
             catch (Exception ex)
@@ -53,22 +65,18 @@ namespace Emkay.S3
             }
         }
 
-        private void Publish(IS3Client client,
-            IEnumerable<ITaskItem> sourceFiles,
-            string bucket,
-            string destinationFolder,
-            bool publicRead,
-            int timeoutMilliseconds)
-        {
-            foreach (var fileItem in sourceFiles.Where(taskItem => taskItem != null
-                && !string.IsNullOrEmpty(taskItem.GetMetadata("Identity"))))
-            {
-                var info = new FileInfo(fileItem.GetMetadata("Identity"));
-                var headers = MsBuildHelpers.GetCustomItemMetadata(fileItem);
 
-                Logger.LogMessage(MessageImportance.Normal, string.Format("Copying file {0}", info.FullName));
-                client.PutFile(bucket, CreateRelativePath(destinationFolder, info.Name), info.FullName, headers, publicRead, timeoutMilliseconds);
+        protected static string CreateRelativePath(string folder, string name)
+        {
+            var destinationFolder = folder ?? String.Empty;
+
+            // Append a folder seperator if a folder has been specified without one.
+            if (!string.IsNullOrEmpty(destinationFolder) && !destinationFolder.EndsWith("/"))
+            {
+                destinationFolder += "/";
             }
+
+            return destinationFolder + name;
         }
     }
 }

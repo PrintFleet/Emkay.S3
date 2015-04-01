@@ -61,7 +61,6 @@
     <Compile Include="ITaskLogger.cs" />
     <Compile Include="MsBuildHelpers.cs" />
     <Compile Include="MsBuildTaskLogger.cs" />
-    <Compile Include="PublishBase.cs" />
     <Compile Include="PublishFiles.cs" />
     <Compile Include="PublishFilesWithHeaders.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
