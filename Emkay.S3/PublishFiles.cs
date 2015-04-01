@@ -9,7 +9,7 @@ namespace Emkay.S3
     public class PublishFiles : S3Base
     {
         public PublishFiles() :
-            this(new S3ClientFactory())
+            base()
         { }
 
         [Obsolete("Only for test purpose!")]
@@ -17,7 +17,7 @@ namespace Emkay.S3
             int timeoutMilliseconds = DefaultRequestTimeout,
             bool publicRead = true,
             ITaskLogger logger = null)
-            : base(s3ClientFactory, timeoutMilliseconds, publicRead, logger)
+            : base(s3ClientFactory, timeoutMilliseconds, logger)
         {
             PublicRead = publicRead;
         }

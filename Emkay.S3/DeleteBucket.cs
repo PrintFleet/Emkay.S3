@@ -6,7 +6,7 @@ namespace Emkay.S3
     public class DeleteBucket : S3Base
     {
         public DeleteBucket()
-            : this(new S3ClientFactory(), DefaultRequestTimeout, null)
+            : base()
         { }
 
         [Obsolete("Only for test purpose!")]

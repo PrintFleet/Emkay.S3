@@ -5,8 +5,7 @@ namespace Emkay.S3
 {
     public class EnumerateBuckets : S3Base
     {
-        public EnumerateBuckets()
-            : this(new S3ClientFactory())
+        public EnumerateBuckets() : base()
         { }
 
         [Obsolete("Only for test purpose!")]

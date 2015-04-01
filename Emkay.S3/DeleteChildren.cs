@@ -5,8 +5,7 @@ namespace Emkay.S3
 {
     public class DeleteChildren : S3Base
     {
-        public DeleteChildren()
-            : this(new S3ClientFactory(), DefaultRequestTimeout, null)
+        public DeleteChildren() : base()
         { }
 
         [Obsolete("Only for test purpose!")]

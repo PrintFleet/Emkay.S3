@@ -1,30 +1,29 @@
 ﻿using System;
+using Amazon.EC2.Model;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
 namespace Emkay.S3
 {
-    public abstract class S3Base : Task, IDisposable
+    public abstract class S3Base : Task
     {
-        private readonly IS3ClientFactory _s3ClientFactory;
-        private ITaskLogger _logger;
-        private IS3Client _client;
+        private readonly Lazy<ITaskLogger> _logger;
+        private readonly Lazy<IS3Client> _client;
 
         public const int DefaultRequestTimeout = 300000; // 5 min default timeout
 
-        protected S3Base(IS3ClientFactory s3ClientFactory,
+        protected S3Base(IS3ClientFactory s3ClientFactory = null,
                          int timeoutMilliseconds = DefaultRequestTimeout,
                          ITaskLogger logger = null)
         {
-            _s3ClientFactory = s3ClientFactory;
-            _logger = logger;
             TimeoutMilliseconds = timeoutMilliseconds;
+            _client = new Lazy<IS3Client>(() => (s3ClientFactory ?? new S3ClientFactory()).Create(Key,Secret));
+            _logger = new Lazy<ITaskLogger>(() => logger ?? new MsBuildTaskLogger(base.Log));
         }
 
         public ITaskLogger Logger
         {
-            get { return _logger ?? (_logger = new MsBuildTaskLogger(Log)); }
-            set { _logger = value; }
+            get { return _logger.Value; }
         }
 
         [Required]
@@ -40,14 +39,7 @@ namespace Emkay.S3
 
         public IS3Client Client
         {
-            get { return _client ?? (_client = _s3ClientFactory.Create(Key, Secret)); }
-        }
-
-        public void Dispose()
-        {
-            if (null != _client)
-                _client.Dispose();
-            _client = null;
+            get { return _client.Value; }
         }
     }
 }
