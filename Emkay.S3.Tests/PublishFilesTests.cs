@@ -43,7 +43,7 @@ namespace Emkay.S3.Tests
                 Times.Once());
             Mock.Get(MockS3Client).Verify(x =>
                 x.PutFile(
-                    "my_bucket", "my/dest/test2.jsonx",
+                    "my_bucket", "my/dest/test2.json",
                     It.IsRegex(@"test2\.json"),
                     It.Is<NameValueCollection>(headers => headers["Content-Type"] == "application/json"),
                     true, 1424),
