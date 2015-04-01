@@ -20,7 +20,10 @@ namespace Emkay.S3.Tests
                 SourceFiles = new ITaskItem[]
                 {
                     new FakeFileItem("test1.txt"),
-                    new FakeFileItem("test2.txt"),
+                    new FakeFileItem("test2.json", new NameValueCollection()
+                    {
+                        {"Content-Type", "application/json"}
+                    }),
                 },
                 DestinationFolder = "my/dest",
                 PublicRead = true,
@@ -31,8 +34,21 @@ namespace Emkay.S3.Tests
 
             // make sure S3 methods were invoked correctly
             Mock.Get(MockS3Client).Verify(x => x.EnsureBucketExists("my_bucket"));
-            Mock.Get(MockS3Client).Verify(x => x.PutFile("my_bucket", "my/dest/test1.txt", It.IsRegex(@"test1\.txt$"), It.IsAny<NameValueCollection>(), true, 1424), Times.Once());
-            Mock.Get(MockS3Client).Verify(x => x.PutFile("my_bucket", "my/dest/test2.txt", It.IsRegex(@"test2\.txt$"), It.IsAny<NameValueCollection>(), true, 1424), Times.Once());
+            Mock.Get(MockS3Client).Verify(x =>
+                x.PutFile(
+                    "my_bucket", "my/dest/test1.txt",
+                    It.IsRegex(@"test1\.txt$"),
+                    It.Is<NameValueCollection>(headers => headers["Content-Type"] == null),
+                    true, 1424),
+                Times.Once());
+            Mock.Get(MockS3Client).Verify(x =>
+                x.PutFile(
+                    "my_bucket", "my/dest/test2.jsonx",
+                    It.IsRegex(@"test2\.json"),
+                    It.Is<NameValueCollection>(headers => headers["Content-Type"] == "application/json"),
+                    true, 1424),
+                Times.Once());
+
         }
 
     }
