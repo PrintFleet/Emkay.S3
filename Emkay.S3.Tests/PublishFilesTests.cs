@@ -1,62 +1,44 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.Collections.Specialized;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
+using Moq;
 using NUnit.Framework;
+#pragma warning disable 618
 
 namespace Emkay.S3.Tests
 {
     [TestFixture]
-    public class PublishFilesTests : PublishTestsBase
+    public class PublishFilesTests 
     {
-        private PublishFiles _publish;
-
-        [SetUp]
-        public void SetUp()
-        {
-            _publish = new PublishFiles(ClientFactory, RequestTimoutMilliseconds, true, LoggerMock)
-                        {
-                            SourceFiles = EnumerateFiles(SourceFolder),
-                            Bucket = Bucket,
-                            DestinationFolder = DestinationFolder
-                        };
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            var removeBucket = new DeleteBucket(ClientFactory, RequestTimoutMilliseconds, LoggerMock)
-                                {
-                                    Bucket = Bucket
-                                };
-
-            Assert.IsTrue(removeBucket.Execute(), "Could not remove test bucket!");
-
-            if (_publish != null)
-                _publish.Dispose();
-            _publish = null;
-        }
-
         [Test]
-        public void Execute_should_succeed()
+        public void PublishFiles_should_call_PutFile()
         {
-            Assert.IsTrue(_publish.Execute());
-        }
+            var s3Client = Mock.Of<IS3Client>();
+            var s3Factory = Mock.Of<IS3ClientFactory>(
+                x=> x.Create("my_aws_key", "my_aws_secret") == s3Client);
+            var logger = Mock.Of<ITaskLogger>();
 
-
-        private static ITaskItem[] EnumerateFiles(string folder)
-        {
-            var files = new List<ITaskItem>();
-
-            foreach (var file in new DirectoryInfo(folder).GetFiles().Select(i => i.FullName).ToList())
+            var publishTask = new PublishFiles(s3Factory, logger: logger)
             {
-                var fileItem = new TaskItem(file);
-                fileItem.SetMetadata("Test-name", "Test-Content");
-                files.Add(fileItem);
-            }
+                Bucket = "my_bucket",
+                Key = "my_aws_key",
+                Secret = "my_aws_secret",
+                SourceFiles = new ITaskItem[]
+                {
+                    new FakeFileItem("test1.txt"),
+                    new FakeFileItem("test2.txt"),
+                },
+                DestinationFolder = "my/dest",
+                PublicRead = true,
+                TimeoutMilliseconds = 1424
+            };
 
-            return files.ToArray();
+            Assert.That(publishTask.Execute(), Is.True);
+
+            // make sure S3 methods were invoked correctly
+            Mock.Get(s3Client).Verify(x => x.EnsureBucketExists("my_bucket"));
+            Mock.Get(s3Client).Verify(x => x.PutFile("my_bucket", "my/dest/test1.txt", It.IsRegex(@"test1\.txt$"), It.IsAny<NameValueCollection>(), true, 1424), Times.Once());
+            Mock.Get(s3Client).Verify(x => x.PutFile("my_bucket", "my/dest/test2.txt", It.IsRegex(@"test2\.txt$"), It.IsAny<NameValueCollection>(), true, 1424), Times.Once());
         }
+
     }
 }
