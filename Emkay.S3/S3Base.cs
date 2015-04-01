@@ -11,12 +11,17 @@ namespace Emkay.S3
         private readonly Lazy<IS3Client> _client;
 
         public const int DefaultRequestTimeout = 300000; // 5 min default timeout
+        public const string DefaultRegion = "us-east-1";
 
         protected S3Base(IS3ClientFactory s3ClientFactory = null,
                          ITaskLogger logger = null)
         {
             TimeoutMilliseconds = DefaultRequestTimeout;
-            _client = new Lazy<IS3Client>(() => (s3ClientFactory ?? new S3ClientFactory()).Create(Key,Secret));
+            Region = DefaultRegion;
+            _client = new Lazy<IS3Client>(() =>
+            {
+                return (s3ClientFactory ?? new S3ClientFactory()).Create(Key, Secret, Region);
+            });
             _logger = new Lazy<ITaskLogger>(() => logger ?? new MsBuildTaskLogger(base.Log));
         }
 
@@ -34,11 +39,14 @@ namespace Emkay.S3
         [Required]
         public string Bucket { get; set; }
 
+        public string Region { get; set; }
+        
         public int TimeoutMilliseconds { get; set; }
 
         public IS3Client Client
         {
             get { return _client.Value; }
         }
+
     }
 }

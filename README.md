@@ -34,9 +34,14 @@ Emkay S3 file publisher is an **MSBuild task** which can be used for publishing 
         Key="$(aws_key)"
         Secret="$(aws_secret)"
         SourceFiles="path\to\file.txt"
-        Bucket="$(aws_s3_bucket)"
+        Bucket="my_s3_bucket"
         DestinationFolder="path/within_S3" />
+
+
   	</Target>
+
+
+## Examples
 
 ### Uploading a folder
 
@@ -68,7 +73,18 @@ You can set custom headers by using ItemGroup metadata:
         </UploadFiles>
         <UploadFiles Include="localpath\**\*.*" Exclude="@(UploadFiles)" />
       </ItemGroup>
-      
+
+## Help
+
+All tasks have some common properties:
+
+* *Key*: Required. Your AWS key. Normally you should use a variable, and pass the value as a parameter to MSBuild or read it from somewhere outside of source control (a file or registry).
+* *Secret*: Required. Your AWS secret. Normally you should use a variable, and pass the value as a parameter to MSBuild or read it from somewhere outside of source control (a file or registry).
+* *Bucket*: Required. The AWS S3 bucket you are operating on.
+* *Region*: The AWS S3 region to use. By default "us-east-1" is used, but any of the [AWS S3 region names](http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region) can be used.
+
+TODO: document each individual task
+
 ## License
 The source code is available under the [MIT license](http://opensource.org/licenses/mit-license.php).
 
