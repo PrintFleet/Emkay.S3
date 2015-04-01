@@ -9,10 +9,8 @@ namespace Emkay.S3
         { }
 
         [Obsolete("Only for test purpose!")]
-        internal EnumerateBuckets(IS3ClientFactory s3ClientFactory,
-            int timeoutMilliseconds = DefaultRequestTimeout,
-            ITaskLogger logger = null)
-            : base(s3ClientFactory, timeoutMilliseconds, logger)
+        internal EnumerateBuckets(IS3ClientFactory s3ClientFactory, ITaskLogger logger = null)
+            : base(s3ClientFactory, logger)
         { }
 
         public string[] Buckets { get; private set; }

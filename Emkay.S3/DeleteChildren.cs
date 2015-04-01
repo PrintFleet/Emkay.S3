@@ -9,8 +9,8 @@ namespace Emkay.S3
         { }
 
         [Obsolete("Only for test purpose!")]
-        internal DeleteChildren(IS3ClientFactory s3ClientFactory, int timeoutMilliseconds, ITaskLogger logger)
-            : base(s3ClientFactory, timeoutMilliseconds, logger)
+        internal DeleteChildren(IS3ClientFactory s3ClientFactory, ITaskLogger logger = null)
+            : base(s3ClientFactory, logger)
         { }
 
         [Required]

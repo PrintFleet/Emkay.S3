@@ -8,19 +8,13 @@ namespace Emkay.S3
 {
     public class PublishFiles : S3Base
     {
-        public PublishFiles() :
-            base()
+        public PublishFiles() : base()
         { }
 
         [Obsolete("Only for test purpose!")]
-        internal PublishFiles(IS3ClientFactory s3ClientFactory,
-            int timeoutMilliseconds = DefaultRequestTimeout,
-            bool publicRead = true,
-            ITaskLogger logger = null)
-            : base(s3ClientFactory, timeoutMilliseconds, logger)
-        {
-            PublicRead = publicRead;
-        }
+        internal PublishFiles(IS3ClientFactory s3ClientFactory, ITaskLogger logger = null)
+            : base(s3ClientFactory, logger)
+        { }
 
         [Required]
         public ITaskItem[] SourceFiles { get; set; }

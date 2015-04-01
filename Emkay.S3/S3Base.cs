@@ -13,10 +13,9 @@ namespace Emkay.S3
         public const int DefaultRequestTimeout = 300000; // 5 min default timeout
 
         protected S3Base(IS3ClientFactory s3ClientFactory = null,
-                         int timeoutMilliseconds = DefaultRequestTimeout,
                          ITaskLogger logger = null)
         {
-            TimeoutMilliseconds = timeoutMilliseconds;
+            TimeoutMilliseconds = DefaultRequestTimeout;
             _client = new Lazy<IS3Client>(() => (s3ClientFactory ?? new S3ClientFactory()).Create(Key,Secret));
             _logger = new Lazy<ITaskLogger>(() => logger ?? new MsBuildTaskLogger(base.Log));
         }

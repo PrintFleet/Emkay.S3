@@ -5,13 +5,12 @@ namespace Emkay.S3
 {
     public class DeleteBucket : S3Base
     {
-        public DeleteBucket()
-            : base()
+        public DeleteBucket() : base()
         { }
 
         [Obsolete("Only for test purpose!")]
-        internal DeleteBucket(IS3ClientFactory s3ClientFactory, int timeoutMilliseconds, ITaskLogger logger)
-            : base(s3ClientFactory, timeoutMilliseconds, logger)
+        internal DeleteBucket(IS3ClientFactory s3ClientFactory, ITaskLogger logger = null)
+            : base(s3ClientFactory, logger)
         { }
 
         public override bool Execute()
