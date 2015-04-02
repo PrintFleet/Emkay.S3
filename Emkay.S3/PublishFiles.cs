@@ -27,11 +27,14 @@ namespace Emkay.S3
         public override bool Execute()
         {
             Logger.LogMessage(MessageImportance.Normal,
-                              string.Format("Publishing {0} files to bucket {1} in region {2}", SourceFiles.Length, Bucket, Region));
+                              string.Format("Publishing {0} files", SourceFiles.Length));
+
+            Logger.LogMessage(MessageImportance.Normal,
+                              string.Format("to S3 bucket {0}", Bucket));
 
             if (!string.IsNullOrEmpty(DestinationFolder))
                 Logger.LogMessage(MessageImportance.Normal,
-                                  string.Format("Destination folder {0}", DestinationFolder));
+                                  string.Format("destination folder {0}", DestinationFolder));
 
             try
             {
@@ -43,9 +46,8 @@ namespace Emkay.S3
                     var info = new FileInfo(fileItem.GetMetadata("Identity"));
                     var headers = MsBuildHelpers.GetCustomItemMetadata(fileItem);
 
-                    var destinationFilename = CreateRelativePath(DestinationFolder, info.Name);
-                    Logger.LogMessage(MessageImportance.Normal, string.Format("Copying file {0} to {1}", info.FullName, destinationFilename));
-                    Client.PutFile(Bucket, destinationFilename, info.FullName, headers, PublicRead, TimeoutMilliseconds);
+                    Logger.LogMessage(MessageImportance.Normal, string.Format("Copying file {0}", info.FullName));
+                    Client.PutFile(Bucket, CreateRelativePath(DestinationFolder, info.Name), info.FullName, headers, PublicRead, TimeoutMilliseconds);
                 }
                 return true;
             }
