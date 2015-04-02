@@ -74,6 +74,18 @@ You can set custom headers by using ItemGroup metadata:
         <UploadFiles Include="localpath\**\*.*" Exclude="@(UploadFiles)" />
       </ItemGroup>
 
+
+Note that only [headers supported by Amazon S3](http://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectPUT.html#RESTObjectPUT-requests-request-headers) will be respected. The main ones to be concerned with:
+
+ * `Cache-Control`: Can be used to specify caching behavior along the request/reply chain. For more information, go to http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9.
+ * `Content-Disposition`: Specifies presentational information for the object. For more information, go to http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html#sec19.5.1.
+ * `Content-Encoding`: Specifies what content encodings have been applied to the object and thus what decoding mechanisms must be applied to obtain the media-type referenced by the Content-Type header field. For more information, go to http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.11.
+ * `Content-Type`: A standard MIME type describing the format of the contents. For more information, go to http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17.
+ * `Expires`: The date and time at which the object is no longer cacheable. For more information, go to http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.21.
+ * `x-amz-meta-`: Any header starting with this prefix is considered user metadata. It will be stored with the object and returned when you retrieve the object. The PUT request header is limited to 8 KB in size. Within the PUT request header, the user-defined metadata is limited to 2 KB in size. User-defined metadata is a set of key-value pairs. The size of user-defined metadata is measured by taking the sum of the number of bytes in the UTF-8 encoding of each key and value.
+ * `x-amz-storage-class`: RRS enables customers to reduce their costs by storing noncritical, reproducible data at lower levels of redundancy than Amazon S3's standard storage. Valid Values: `STANDARD`, `REDUCED_REDUNDANCY`
+ * `x-amz-website​-redirect-location`: If the bucket is configured as a website, redirects requests for this object to another object in the same bucket or to an external URL. Amazon S3 stores the value of this header in the object metadata. For information about object metadata, go to [Object Key and Metadata](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html).  The value must be prefixed by, `/`, `http://` or `https://`. The length of the value is limited to 2 KB.
+ 
 ## Help
 
 All tasks have some common properties:
