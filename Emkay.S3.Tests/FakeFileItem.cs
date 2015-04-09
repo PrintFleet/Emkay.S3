@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
@@ -13,11 +14,29 @@ namespace Emkay.S3.Tests
     /// </summary>
     internal class FakeFileItem : ITaskItem 
     {
-        public FakeFileItem(string filename, NameValueCollection metadata = null)
+        public FakeFileItem(string filepath, NameValueCollection metadata = null)
         {
-            ItemSpec = filename;
-            FakeMetadata = metadata ?? new NameValueCollection();
-            FakeMetadata["Identity"] = filename;
+            ItemSpec = filepath;
+            FakeMetadata = new NameValueCollection();
+            // set default metadata
+            FakeMetadata["Identity"] = filepath;
+            FakeMetadata["FullPath"] = @"Z:\fakepath\" + filepath;
+            FakeMetadata["RootDir"] = @"Z:\";
+            FakeMetadata["RelativeDir"] = Path.GetDirectoryName(filepath) + @"\"; // path specified in the Include attribute, up to the final backslash (\)
+            FakeMetadata["Directory"] = @"fakepath\" + FakeMetadata["RelativeDir"]; // directory of the item, without the root directory.
+            FakeMetadata["Filename"] = Path.GetFileNameWithoutExtension(filepath);
+            FakeMetadata["Extension"] = Path.GetExtension(filepath);
+            //TODO if needed: ModifiedTime, CreatedTime, AccessedTime
+                            
+            // passed metadata overrides 
+            if (metadata != null)
+            {
+                foreach (var key in metadata.AllKeys)
+                {
+                    FakeMetadata[key] = metadata[key];
+                }    
+            }
+            
         }
 
         public NameValueCollection FakeMetadata { get; set; }

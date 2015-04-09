@@ -20,7 +20,7 @@ namespace Emkay.S3.Tests
                 SourceFiles = new ITaskItem[]
                 {
                     new FakeFileItem("test1.txt"),
-                    new FakeFileItem("test2.json", new NameValueCollection()
+                    new FakeFileItem(@"sub1\test2.json", new NameValueCollection()
                     {
                         {"Content-Type", "application/json"}
                     }),
@@ -43,12 +43,11 @@ namespace Emkay.S3.Tests
                 Times.Once());
             Mock.Get(MockS3Client).Verify(x =>
                 x.PutFile(
-                    "my_bucket", "my/dest/test2.json",
+                    "my_bucket", "my/dest/sub1/test2.json",
                     It.IsRegex(@"test2\.json"),
                     It.Is<NameValueCollection>(headers => headers["Content-Type"] == "application/json"),
                     true, 1424),
                 Times.Once());
-
         }
 
     }
