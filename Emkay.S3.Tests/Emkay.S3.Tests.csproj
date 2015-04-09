@@ -66,6 +66,7 @@
     <Compile Include="PublishFilesTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="S3TestsBase.cs" />
+    <Compile Include="TaskItemExtensionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

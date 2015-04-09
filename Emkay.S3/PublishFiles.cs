@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
@@ -40,12 +41,12 @@ namespace Emkay.S3
                 foreach (var fileItem in SourceFiles.Where(taskItem => taskItem != null
                 && !string.IsNullOrEmpty(taskItem.GetMetadata("Identity"))))
                 {
-                    var info = new FileInfo(fileItem.GetMetadata("Identity"));
-                    var headers = MsBuildHelpers.GetCustomItemMetadata(fileItem);
+                    var localFilename = fileItem.GetFullPath();
+                    var destinationFilename = fileItem.GetS3Key(DestinationFolder);
+                    var headers = fileItem.GetCustomItemMetadata();
 
-                    var destinationFilename = CreateRelativePath(DestinationFolder, info.Name);
-                    Logger.LogMessage(MessageImportance.Normal, string.Format("Copying file {0} to {1}", info.FullName, destinationFilename));
-                    Client.PutFile(Bucket, destinationFilename, info.FullName, headers, PublicRead, TimeoutMilliseconds);
+                    Logger.LogMessage(MessageImportance.Normal, string.Format("Copying file {0} to {1}", localFilename, destinationFilename));
+                    Client.PutFile(Bucket, destinationFilename, localFilename, headers, PublicRead, TimeoutMilliseconds);
                 }
                 return true;
             }
@@ -57,18 +58,8 @@ namespace Emkay.S3
             }
         }
 
-
-        protected static string CreateRelativePath(string folder, string name)
-        {
-            var destinationFolder = folder ?? String.Empty;
-
-            // Append a folder seperator if a folder has been specified without one.
-            if (!string.IsNullOrEmpty(destinationFolder) && !destinationFolder.EndsWith("/"))
-            {
-                destinationFolder += "/";
-            }
-
-            return destinationFolder + name;
-        }
+        
     }
+
+    
 }

@@ -59,7 +59,7 @@
     <Compile Include="IS3Client.cs" />
     <Compile Include="IS3ClientFactory.cs" />
     <Compile Include="ITaskLogger.cs" />
-    <Compile Include="MsBuildHelpers.cs" />
+    <Compile Include="TaskItemExtensions.cs" />
     <Compile Include="MsBuildTaskLogger.cs" />
     <Compile Include="PublishFiles.cs" />
     <Compile Include="PublishFilesWithHeaders.cs" />
