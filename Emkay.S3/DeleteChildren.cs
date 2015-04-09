@@ -13,6 +13,10 @@ namespace Emkay.S3
             : base(s3ClientFactory, logger)
         { }
 
+
+        [Required]
+        public string Bucket { get; set; }
+
         [Required]
         public string[] Children { private get; set; }
 

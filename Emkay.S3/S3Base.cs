@@ -36,9 +36,6 @@ namespace Emkay.S3
         [Required]
         public string Secret { get; set; }
 
-        [Required]
-        public string Bucket { get; set; }
-
         public string Region { get; set; }
         
         public int TimeoutMilliseconds { get; set; }

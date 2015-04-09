@@ -23,6 +23,9 @@ namespace Emkay.S3
         [Required]
         public string DestinationFolder { get; set; }
 
+        [Required]
+        public string Bucket { get; set; }
+
         public bool PublicRead { get; set; }
 
         /// <summary>
