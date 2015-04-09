@@ -84,12 +84,17 @@ namespace Emkay.S3
         }
 
         
-
+        /// <summary>
+        /// Gets all defined custom metadata. Specifically excludes MSBuild Well Known metadata
+        /// (see https://msdn.microsoft.com/en-us/library/ms164313.aspx for a list).
+        /// </summary>
+        /// <param name="taskItem"></param>
+        /// <returns></returns>
         public static NameValueCollection GetCustomItemMetadata(this ITaskItem taskItem)
         {
             var nameValueCollection = new FriendlyNameValueCollection();
 
-            foreach (string key in taskItem.MetadataNames.Cast<string>())
+            foreach (var key in taskItem.MetadataNames.Cast<string>().Except(MsBuildWellKnownMetadata))
             {
                 nameValueCollection.Add(key, taskItem.GetMetadata(key));
             }
@@ -97,6 +102,24 @@ namespace Emkay.S3
             return nameValueCollection;
         }
 
+        private static readonly string[] MsBuildWellKnownMetadata = new[]
+        {
+            "FullPath",
+            "RootDir",
+            "Filename",
+            "Extension",
+            "RelativeDir",
+            "Directory",
+            "RecursiveDir",
+            "Identity",
+            "ModifiedTime",
+            "CreatedTime",
+            "AccessedTime",
+            "DefiningProjectFullPath",
+            "DefiningProjectDirectory",
+            "DefiningProjectName",
+            "DefiningProjectExtension"
+        };
 
         private class FriendlyNameValueCollection : NameValueCollection
         {

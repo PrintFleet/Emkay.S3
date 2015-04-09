@@ -54,6 +54,10 @@ namespace Emkay.S3
                     var headers = fileItem.GetCustomItemMetadata();
 
                     Logger.LogMessage(MessageImportance.Normal, string.Format("Copying file {0} to {1}", localFilename, destinationFilename));
+                    if (headers.Count > 0)
+                    {
+                        Logger.LogMessage(MessageImportance.Normal, string.Format("-> Custom Headers: {0}", headers.ToString()));
+                    }
                     Client.PutFile(Bucket, destinationFilename, localFilename, headers, PublicRead, TimeoutMilliseconds);
                 }
                 return true;
