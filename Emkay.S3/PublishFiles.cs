@@ -24,6 +24,14 @@ namespace Emkay.S3
         public string DestinationFolder { get; set; }
 
         public bool PublicRead { get; set; }
+
+        /// <summary>
+        /// If True, the original subfolder structure is ignored and all files are uploaded
+        /// directly to the destination directory. If False, the RecursiveDir (if wildcards 
+        /// were used) or original subfolder (RelativeDir) is used as a subpath below the 
+        /// DesintationFolder. 
+        /// </summary>
+        public bool FlattenFolders { get; set; }
         
         public override bool Execute()
         {
@@ -42,7 +50,7 @@ namespace Emkay.S3
                 && !string.IsNullOrEmpty(taskItem.GetMetadata("Identity"))))
                 {
                     var localFilename = fileItem.GetFullPath();
-                    var destinationFilename = fileItem.GetS3Key(DestinationFolder);
+                    var destinationFilename = fileItem.GetS3Key(DestinationFolder, FlattenFolders);
                     var headers = fileItem.GetCustomItemMetadata();
 
                     Logger.LogMessage(MessageImportance.Normal, string.Format("Copying file {0} to {1}", localFilename, destinationFilename));
