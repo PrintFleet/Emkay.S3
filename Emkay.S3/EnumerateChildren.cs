@@ -17,6 +17,7 @@ namespace Emkay.S3
         [Required]
         public string Bucket { get; set; }
 
+        [Output]
         public string[] Children { get; private set; }
 
         public string Prefix { get; set; }

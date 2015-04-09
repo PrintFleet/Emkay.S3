@@ -13,6 +13,7 @@ namespace Emkay.S3
             : base(s3ClientFactory, logger)
         { }
 
+        [Output]
         public string[] Buckets { get; private set; }
 
         public override bool Execute()
